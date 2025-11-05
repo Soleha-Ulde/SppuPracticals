@@ -11,6 +11,29 @@ X = df.iloc[:,1:3001]  # word frequency features
 X
 Y = df.iloc[:,-1].values
 Y
+numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
+# Visualize outliers
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# compute IQR outlier counts (you already had this)
+Q1 = df_numeric.quantile(0.25)
+Q3 = df_numeric.quantile(0.75)
+IQR = Q3 - Q1
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+outlier_mask = ((df_numeric < lower) | (df_numeric > upper))
+outlier_counts = outlier_mask.sum().sort_values(ascending=False)
+
+# pick top N features
+topN = 12
+top_features = outlier_counts.head(topN).index.tolist()
+
+plt.figure(figsize=(16,6))
+sns.boxplot(data=df_numeric[top_features])
+plt.title(f"Boxplots for top {topN} features by outlier count")
+plt.xticks(rotation=45, ha='right')
+plt.show()
 # Split data 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25, random_state=42)
 from sklearn.metrics import classification_report, confusion_matrix
